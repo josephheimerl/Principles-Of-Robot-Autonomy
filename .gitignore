@@ -1,0 +1,76 @@
+# -------------------------
+# VS Code
+# -------------------------
+.vscode/
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python tooling / caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# -------------------------
+# Jupyter
+# -------------------------
+.ipynb_checkpoints/
+
+# -------------------------
+# Build / package artifacts
+# -------------------------
+build/
+dist/
+*.egg-info/
+*.egg
+
+# -------------------------
+# ROS 2 / colcon
+# -------------------------
+install/
+log/
+
+# Be careful with this one if your project
+# legitimately has a source directory named build
+build/
+
+# -------------------------
+# C / C++ artifacts
+# -------------------------
+*.o
+*.obj
+*.out
+*.a
+*.so
+*.dylib
+*.exe
+
+# -------------------------
+# macOS
+# -------------------------
+.DS_Store
+
+# -------------------------
+# Linux / editors
+# -------------------------
+*~
+*.swp
+*.swo
+
+# -------------------------
+# Temporary files
+# -------------------------
+*.tmp
+*.temp
+*.log
