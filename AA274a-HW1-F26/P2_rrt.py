@@ -115,6 +115,44 @@ class RRT(object):
         #   - the order in which you pass in arguments to steer_towards and is_free_motion is important
 
         ########## Code starts here ##########
+        xrand = np.zeros(np.shape(self.x_init))
+        success = False
+
+        def generate_path(V,P,idx)-> list[tuple]:
+            # base case
+            if P[idx] == -1:
+                return [tuple(V[idx,:])]
+            else:
+                return generate_path(V[:idx,:],P[:idx],P[idx]) + [tuple(V[idx,:])]
+
+        for i in range(1,max_iters):
+            # uniform sample, go towards goal if draw true
+            go_towards_goal = np.random.uniform(0,1) < goal_bias
+            
+            if go_towards_goal:
+                xrand = self.x_goal
+            else:
+                # otherwise generate a random state vector
+                xrand = np.random.uniform(self.statespace_lo,self.statespace_hi,size=np.shape(self.x_init))
+            
+            # find nearest neighbor and generate a point in the direction of the random state
+            neighbor_idx = self.find_nearest(V[:i,:],xrand)
+            nearest_neighbor = V[neighbor_idx,:]
+            xnew = self.steer_towards(nearest_neighbor,xrand, eps)
+
+            # if the path from the neighbor to the new node is collision free:
+            if self.is_free_motion(self.obstacles,nearest_neighbor,xnew):
+                # insert new node to the list @ index i
+                V[i,:] = xnew
+                # set parent of index i+1 to neighbor index
+                P[i] = neighbor_idx
+                # start path reconstruction if the new node is the goal
+                if all(xnew == np.array(self.x_goal)): #np.linalg.norm(np.array(self.x_goal) - xnew) < eps*10**-5:
+                    success = True
+                    self.path = generate_path(V[:i,:],P[:i],i)
+                    break
+            
+            self.num_iters = self.num_iters+1
 
         ########## Code ends here ##########
 
@@ -171,15 +209,19 @@ class GeometricRRT(RRT):
         # Consult function specification in parent (RRT) class.
         ########## Code starts here ##########
         # Hint: This should take 1-3 line.
-
+        errors = np.array(V) - np.array(x)[None,:]
+        error_norm = np.linalg.norm(errors,axis=1)
+        return np.argmin(error_norm)
         ########## Code ends here ##########
-        pass
+        
 
     def steer_towards(self, x1, x2, eps):
         # Consult function specification in parent (RRT) class.
         ########## Code starts here ##########
         # Hint: This should take 1-4 line.
-
+        diff = np.array(x2)-np.array(x1)
+        diffnorm = np.linalg.norm(diff)
+        return x2 if diffnorm < eps else x1 + eps/diffnorm * diff
         ########## Code ends here ##########
         pass
 

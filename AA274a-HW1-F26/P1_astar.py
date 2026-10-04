@@ -42,8 +42,11 @@ class AStar(object):
         Hint: self.occupancy is a DetOccupancyGrid2D object, take a look at its methods for what might be
               useful here
         """
+        
         ########## Code starts here ##########
-        raise NotImplementedError("is_free not implemented")
+        states_in_bounds = [xi >= xi_lo and xi <= xi_hi for xi, xi_lo, xi_hi in zip(x,self.statespace_lo,self.statespace_hi)]
+     
+        return all(states_in_bounds) and self.occupancy.is_free(x) 
         ########## Code ends here ##########
 
     def distance(self, x1, x2):
@@ -60,7 +63,7 @@ class AStar(object):
         HINT: This should take one line. Tuples can be converted to numpy arrays using np.array().
         """
         ########## Code starts here ##########
-        raise NotImplementedError("distance not implemented")
+        return np.sqrt(np.sum(np.square(np.array(x1) - np.array(x2))))
         ########## Code ends here ##########
 
     def heuristic(self, x):
@@ -80,7 +83,19 @@ class AStar(object):
               an unrecognized self.heuristic_type.
         """
         ########## Code starts here ##########
-        raise NotImplementedError("heuristic not implemented")
+        w = self.heuristic_weight
+        xdiff = np.array(self.x_goal) - np.array(x)
+        h : float = np.inf
+        if self.heuristic_type == "l1":
+            h = np.sum(np.abs(xdiff))
+        elif self.heuristic_type == "l2":
+            h = np.linalg.norm(xdiff)
+        elif self.heuristic_type == "linf":
+            h = np.max(np.abs(xdiff))
+        else:
+            raise RuntimeError("Unexpected state, invalid heuristic")
+        
+        return h*w
         ########## Code ends here ##########
 
     def snap_to_grid(self, x):
@@ -116,8 +131,32 @@ class AStar(object):
         """
         neighbors = []
         ########## Code starts here ##########
-        raise NotImplementedError("get_neighbors not implemented")
+#         writing code that extends to N-d state space
+        dx = self.resolution
+        N = len(x)
+#         each direction has 3 states, jog backward, no jog, jog forward
+        jog_amounts = (-dx,0,dx)
+#         breakpoint()
+        def generate_neighbors(jog_list):
+            if len(jog_list) == N:
+#                 base case
+                neighbor = self.snap_to_grid(np.array(x)+np.array(jog_list))
+    
+                if np.sum(np.abs(np.array(jog_list))) == 0:
+#                     avoid adding itself as a neighbor
+                    return
+                elif self.is_free(neighbor):
+                    neighbors.append(neighbor)
+            else:
+#                 recursive case
+                for jog in jog_amounts:
+                    generate_neighbors(jog_list + (jog,))
+        
+        empty = ()
+        generate_neighbors(empty)
         ########## Code ends here ##########
+        
+        
         return neighbors
 
     def find_best_est_cost_through(self):
@@ -185,7 +224,42 @@ class AStar(object):
                 of the handout.
         """
         ########## Code starts here ##########
-        raise NotImplementedError("solve not implemented")
+#         initialize list to explore by starting at our inital position
+        # turns out that was done in constructor
+        while len(self.open_set)>0:
+#             pop the lowest cost through off the list to explore
+            curr_x = self.find_best_est_cost_through()
+            self.open_set.remove(curr_x)
+            self.closed_set.add(curr_x)
+            
+            # if the state we are exploring is the target state, run path reconstruction
+            if self.distance(curr_x, self.x_goal) < self.resolution/10:
+#                 give a margin just in case any weird rounding thing happens
+                self.path = self.reconstruct_path()
+                return True
+
+            neighbors = self.get_neighbors(curr_x)
+            # for each neighbor:
+            for neighbor in neighbors:
+                # do nothing if it is already in the closed set
+                if neighbor in self.closed_set:
+                    continue
+                
+                # ecalculate the total cost to get to the neighbor
+                tentative_cost_to_arrive = self.cost_to_arrive[curr_x] + self.distance(curr_x,neighbor)
+                # if the neighbor is not in the open set, add it
+                if not neighbor in self.open_set:
+                    self.open_set.add(neighbor)
+                
+                elif tentative_cost_to_arrive > self.cost_to_arrive[neighbor]:
+                    # else, if the cost to get to it is higher than the one it has, dont do anything to it
+                    continue
+                    
+                # update dictionaries
+                self.came_from[neighbor] = curr_x
+                self.cost_to_arrive[neighbor] = tentative_cost_to_arrive
+                self.est_cost_through[neighbor] = tentative_cost_to_arrive + self.heuristic(neighbor)
+        return False
         ########## Code ends here ##########
 
 class DetOccupancyGrid2D(object):
