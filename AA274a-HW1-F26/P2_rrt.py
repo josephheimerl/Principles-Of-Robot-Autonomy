@@ -195,8 +195,6 @@ class RRT(object):
             None, but should modify self.path
         """
         ########## Code starts here ##########
-        # TEMP
-        # self.path = [(1,1),(1,1)]
 
         success = False
         while not success:
