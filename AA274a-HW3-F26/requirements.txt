@@ -1,0 +1,5 @@
+matplotlib>=3.3.3
+numpy>=1.19.4
+scipy>=1.11.3
+opencv-python>=4.5
+notebook
