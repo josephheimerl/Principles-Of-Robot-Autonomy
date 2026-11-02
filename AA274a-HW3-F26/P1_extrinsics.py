@@ -36,8 +36,29 @@ def compute_homography(world_xy, uv):
     Output:
         (3, 3) homography, scaled so that H[2, 2] = 1
     """
+
     ########## Code starts here ##########
-    raise NotImplementedError
+    # H = K[R,t]
+    # ph = H * PhW
+
+    X = world_xy[:,0]
+    Y = world_xy[:,1]
+    u = uv[:,0]
+    v = uv[:,1]
+    
+    Mi = lambda i: np.array([
+        [-X[i], -Y[i], -1,      0,      0,   0,  u[i]*X[i], u[i]*Y[i], u[i]],
+        [    0,     0,  0,  -X[i],  -Y[i],  -1,  v[i]*X[i], v[i]*Y[i], v[i]]
+    ])
+
+    M = np.vstack([Mi(i) for i in range(len(X))])
+
+    _,_,Vt = np.linalg.svd(M)
+
+    h = Vt[-1,:]
+    H = h.reshape(3,3)
+    H = H/H[2,2]
+    return H
     ########## Code ends here ##########
 
 
@@ -55,7 +76,23 @@ def pose_from_homography(K, H):
           replace [r0, r1, r0 x r1] by the closest rotation matrix (SVD).
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    # rescale
+    
+    Rt = np.linalg.inv(K)@H
+
+    scale = np.linalg.norm(Rt[:,0])
+    Rt = Rt/scale
+    Rt = Rt * Rt[2,2]/abs(Rt[2,2])
+
+    # construct closest orthogonal matrix
+    R0 = np.column_stack([Rt[:,:2], np.cross(Rt[:,0],Rt[:,1])])
+    U,_,Vt = np.linalg.svd(R0)
+    Sig = np.eye(3)
+    Sig[2,2] = np.linalg.det(U@Vt)
+    R = U@Sig@Vt
+    
+
+    t = Rt[:,2]
     ########## Code ends here ##########
     return R, t
 
@@ -69,9 +106,12 @@ def project_points(K, R, t, X):
         (N, 2) pixel coordinates (u, v)
     """
     ########## Code starts here ##########
-    raise NotImplementedError
-    ########## Code ends here ##########
+    Xh = np.column_stack([X, np.ones((len(X), 1))])
 
+    ph = K @ np.column_stack([R,t]) @ Xh.T
+    p = ph[:2,:] / ph[2,:]
+    ########## Code ends here ##########
+    return p.T
 
 def reprojection_rmse(uv, uv_proj):
     """
@@ -79,5 +119,9 @@ def reprojection_rmse(uv, uv_proj):
         Root-mean-square pixel distance between (N, 2) arrays uv and uv_proj
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    diff2 = (uv - uv_proj)**2
+
+    rmse = np.sqrt(np.mean(np.sum(diff2, axis=1)))
+    return rmse
+
     ########## Code ends here ##########

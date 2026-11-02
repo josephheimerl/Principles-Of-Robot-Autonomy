@@ -18,7 +18,14 @@ def nearest_neighbors(src, dst):
     HINT: build a scipy.spatial.cKDTree on dst once and query it.
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    kd = cKDTree(dst)
+    dist,idx = kd.query(src)
+
+    # N = len(src)
+    # dist = np.zeros(N)
+    # idx = np.zeros(N,int)
+    # for i in range(N):
+    #     idxi,disti = kd.query(src[i,:])
     ########## Code ends here ##########
     return dist, idx
 
@@ -36,7 +43,26 @@ def best_fit_transform(A, B):
           flip the sign of the last singular direction if det(R) < 0.
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    abar = np.mean(A,axis=0)
+    bbar = np.mean(B,axis=0)
+
+    Cov = (A - abar).T @ (B-bbar)
+
+    
+
+    U, _, Vt = np.linalg.svd(Cov)
+
+    Sig = np.eye(3)
+    Sig[2,2] = np.linalg.det(Vt.T@U.T)
+    R = Vt.T@Sig@U.T
+
+    t = bbar-R@abar
+
+    T = np.zeros([4,4])
+    T[3,3] = 1
+    T[:3,:3] = R
+    T[:3,3] = t
+
     ########## Code ends here ##########
     return T
 
@@ -63,6 +89,30 @@ def icp(src, dst, T_init, max_iters=50, tol=1e-6, reject_dist=None):
     T = T_init.copy()
     errors = []
     ########## Code starts here ##########
-    raise NotImplementedError
+    srcH = np.column_stack([src,np.ones(len(src))])
+    for i in range(max_iters):
+        # Transform src by current T
+        TsrcH = (T @ srcH.T).T
+
+        # Find nearest neighbors
+        dist, idx = nearest_neighbors(TsrcH[:,:3],dst)
+
+        if reject_dist is not None:
+            dist_mask = dist < reject_dist
+            idx = idx[dist_mask]
+            TsrcH = TsrcH[dist_mask,:]
+
+        # Fit transform based on nearest neighbor correspondence
+        dT = best_fit_transform(TsrcH[:,:3], dst[idx,:])
+
+        # Compose with T
+        T = dT@T
+
+        mean_dist = np.mean(dist)
+        errors.append(mean_dist)
+        if i > 0 and np.abs(errors[i-1] - mean_dist)< tol:
+            break
+
+
     ########## Code ends here ##########
     return T, errors

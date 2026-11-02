@@ -11,11 +11,18 @@ def homography_residuals(H, world_xy, uv):
         (N,) pixel distance between uv and the projection of world_xy through H
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    # ph = H * PhW
+    
+    Wxyh = np.column_stack([world_xy,np.ones(len(uv))]).T
+
+    ph = H @ Wxyh
+    uvproj = ph[:2,:]/ph[2,:]
+
+    return np.linalg.norm(uvproj.T - uv,axis=1)
     ########## Code ends here ##########
 
 
-def ransac_num_iterations(p, w, s):
+def ransac_num_iterations(p, w, s) -> int:
     """
     Number of RANSAC iterations needed to draw at least one all-inlier sample
     with probability p, given inlier ratio w and sample size s.
@@ -23,7 +30,8 @@ def ransac_num_iterations(p, w, s):
         int, rounded up
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    kbar = np.log(1-p)/np.log(1-w**s)
+    return int(np.ceil(kbar))
     ########## Code ends here ##########
 
 
@@ -44,6 +52,23 @@ def ransac_homography(world_xy, uv, num_iters, threshold, rng):
     """
     N = len(uv)
     ########## Code starts here ##########
-    raise NotImplementedError
+
+    best = 0
+
+    H = None
+    inliers = None
+
+    for _ in range(num_iters):
+        idxs = rng.choice(N, 4, replace=False)
+        Hi = compute_homography(world_xy[idxs],uv[idxs])
+
+        dists = homography_residuals(Hi,world_xy,uv)
+        inliersi = dists <= threshold
+
+        if sum(inliersi > best):
+            H = Hi
+            inliers = inliersi
+
+
     ########## Code ends here ##########
     return H, inliers
