@@ -36,7 +36,7 @@ def nms(boxes, scores, iou_threshold):
         (K,) integer indices of the kept boxes, sorted by decreasing score
     """
     ########## Code starts here ##########
-    descending_score = np.argsort(scores,descending=True)
+    descending_score = np.argsort(scores)[::-1]
     boxes_sorted = boxes[descending_score,:]
     iou_matrix = box_iou(boxes_sorted,boxes_sorted)
     over_iou_thresh = iou_matrix > iou_threshold
@@ -76,7 +76,7 @@ def batched_nms(boxes, scores, labels, iou_threshold):
         kept_indices = np.concatenate((kept_indices,curr_label_indices[new_indices]))
 
     final_scores = scores[kept_indices]
-    sorted_indices = np.argsort(final_scores,descending=True)
+    sorted_indices = np.argsort(final_scores)[::-1]
     return kept_indices[sorted_indices]
     ########## Code ends here ##########
 
@@ -94,18 +94,19 @@ def match_detections(boxes, scores, gt_boxes, iou_threshold=0.5):
         (N,) boolean array aligned with the input order (True = true positive)
     """
     ########## Code starts here ##########
-    descending_score = np.argsort(scores,descending=True)
+    descending_score = np.argsort(scores)[::-1]
     boxes_sorted = boxes[descending_score,:]
-    ious = box_iou(boxes[descending_score],gt_boxes)
+    ious = box_iou(boxes_sorted,gt_boxes)
+
     true_positive = np.zeros(len(boxes),bool)
     for i in range(len(boxes)):
         # break early if all ground truths consumed
         if ious.shape[1] == 0:
             break
-
+        
         max_idx = np.argmax(ious[i,:])
         if ious[i,max_idx] > iou_threshold:
-            true_positive[i] = True
+            true_positive[descending_score[i]] = True
             keep_mask = np.arange(ious.shape[1]) != max_idx
             ious = ious[:,keep_mask]
 
@@ -122,7 +123,7 @@ def precision_recall(scores, tp, num_gt):
         precision, recall: (N,) arrays, entry k-1 uses the k highest-scoring detections
     """
     ########## Code starts here ##########
-    descending_score = np.argsort(scores,descending=True)
+    descending_score = np.argsort(scores)[::-1]
     tp_cumsum = np.cumsum(tp[descending_score])
     k = np.arange(1,len(scores)+1)
     return (tp_cumsum/k,tp_cumsum/num_gt)

@@ -21,7 +21,7 @@ def homography_residuals(H, world_xy, uv):
     return np.linalg.norm(uvproj.T - uv,axis=1)
     ########## Code ends here ##########
 
-
+ 
 def ransac_num_iterations(p, w, s) -> int:
     """
     Number of RANSAC iterations needed to draw at least one all-inlier sample
@@ -65,9 +65,10 @@ def ransac_homography(world_xy, uv, num_iters, threshold, rng):
         dists = homography_residuals(Hi,world_xy,uv)
         inliersi = dists <= threshold
 
-        if sum(inliersi > best):
+        if sum(inliersi) > best:
             H = Hi
             inliers = inliersi
+            best = sum(inliersi)
 
 
     ########## Code ends here ##########

@@ -1,0 +1,12 @@
+time,speed,turn,range_0,range_1,range_2,range_3,range_4,range_5,range_6,range_7,range_8,range_9,range_10,range_11,bearing_0,bearing_1,bearing_2,bearing_3,bearing_4,bearing_5,bearing_6,bearing_7,bearing_8,bearing_9,bearing_10,bearing_11
+0.000000,2.873404,-0.069472,1.810902,2.516661,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,-122.844397,35.812160,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan
+1.000000,2.782657,-0.043366,4.303319,1.745111,2.495017,nan,nan,nan,nan,nan,nan,4.657696,nan,nan,-159.570980,123.494950,-37.064649,nan,nan,nan,nan,nan,nan,76.213365,nan,nan
+2.000000,3.077862,-0.018780,nan,4.215711,1.853316,2.542458,nan,nan,nan,nan,nan,4.941343,nan,nan,nan,160.401231,-124.741725,35.957086,nan,nan,nan,nan,nan,112.747711,nan,nan
+3.000000,2.877261,1.430929,nan,nan,4.256127,1.724225,2.503145,4.535935,nan,4.569346,nan,nan,nan,nan,nan,nan,-159.126768,121.706332,-36.701133,12.512355,nan,77.219801,nan,nan,nan,nan
+4.000000,3.052793,0.205431,nan,nan,nan,4.209221,1.745461,1.740093,nan,4.967888,nan,nan,nan,nan,nan,nan,nan,67.267910,145.667997,-56.836535,nan,23.732920,nan,nan,nan,nan
+5.000000,3.108798,1.593574,nan,nan,nan,4.230504,4.569695,2.510127,2.542274,2.521383,nan,nan,nan,nan,nan,nan,nan,109.309308,167.413865,-143.963467,-36.750313,53.289537,nan,nan,nan,nan
+6.000000,2.809813,-0.026751,nan,nan,nan,nan,nan,nan,1.877686,2.563403,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,146.709739,37.925589,nan,nan,nan,nan
+7.000000,2.649421,-0.008238,nan,nan,nan,4.621462,nan,nan,4.581330,1.832601,2.499021,nan,nan,nan,nan,nan,nan,77.329715,nan,nan,167.607505,124.111097,-36.389613,nan,nan,nan
+8.000000,2.917741,0.016267,nan,nan,nan,4.966556,nan,nan,nan,4.333619,1.868284,2.475329,nan,nan,nan,nan,nan,114.262333,nan,nan,nan,158.455320,-123.954628,35.607022,nan,nan
+9.000000,2.703698,-0.038359,nan,4.520207,nan,nan,nan,nan,nan,nan,4.303779,1.785020,2.540186,4.608321,nan,77.845481,nan,nan,nan,nan,nan,nan,-158.499036,123.836067,-35.328731,11.273631
+10.000000,0.000000,0.000000,nan,4.943080,nan,nan,nan,nan,nan,nan,nan,4.227932,1.844744,1.847543,nan,114.339963,nan,nan,nan,nan,nan,nan,nan,159.171279,-122.093058,32.839968
