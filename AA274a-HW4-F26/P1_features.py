@@ -19,7 +19,23 @@ def conv2d(image, kernel):
     H, W = image.shape
     n, m = kernel.shape[0] // 2, kernel.shape[1] // 2
     ########## Code starts here ##########
-    raise NotImplementedError
+    # initialize output array
+    out = np.zeros_like(image)
+
+    # create padded image
+    padded_image = np.zeros(image.shape + np.array([2*n,2*m]))
+    padded_image[n:-n,m:-m] = image
+    # loop through dim 0 of kernel
+    for i in range(2*n+1):
+        # loop through dim 1
+        for j in range(2*m+1):
+            # add product of this kernel coord and shifted image matrix to running total output
+            stopx = -i 
+            stopy = -j
+            stopx = None if stopx == 0 else stopx
+            stopy = None if stopy == 0 else stopy
+            out = out + kernel[i,j]*padded_image[2*n-i:stopx,2*m-j:stopy]
+
     ########## Code ends here ##########
     return out
 
@@ -32,7 +48,14 @@ def gaussian_kernel(size, sigma):
         (size, size) array
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    n = size//2
+    X,Y = np.meshgrid(range(-n,n+1),range(-n,n+1))
+
+    norm = lambda x,y: np.exp( -(x**2 + y**2)/(2*sigma**2) )
+    norm_v = np.vectorize(norm)
+
+    G = norm_v(X,Y)
+    G = G/np.sum(G)
     ########## Code ends here ##########
     return G
 
@@ -45,7 +68,14 @@ def sobel_gradients(image):
         Gx, Gy: (H, W) arrays, Gx = conv2d(image, S_x) and Gy = conv2d(image, S_y)
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    S_x = [[1, 0, -1], 
+           [2, 0, -2], 
+           [1, 0, -1]]
+    S_y = [[1, 2, 1], 
+           [0, 0, 0], 
+           [-1, -2, -1]]
+    Gx = conv2d(image,S_x)
+    Gy = conv2d(image,S_y)
     ########## Code ends here ##########
     return Gx, Gy
 
@@ -64,7 +94,11 @@ def patch_vectors(image, points, half_size=7):
     image = np.asarray(image, dtype=float)
     h = half_size
     ########## Code starts here ##########
-    raise NotImplementedError
+    # initialize array
+    P = np.zeros([points.shape[0],(2*h+1)**2])
+    extract_matrix = lambda point: ( lambda r,c: image[r-h:r+h+1, c-h:c+h+1] )(point[0],point[1]) # does NOT pad, will be wrong if near edge probably
+    P= np.vstack([extract_matrix(point).reshape(1,-1) for point in points])
+    P = P / np.maximum(np.linalg.norm(P,axis=1,keepdims=True),1e-8)
     ########## Code ends here ##########
     return P
 
@@ -80,6 +114,11 @@ def match_patches(vecs1, vecs2):
         scores: (K1,) the normalized correlation of each match
     """
     ########## Code starts here ##########
-    raise NotImplementedError
-    ########## Code ends here ##########
+    # each row is vec1, col is vec2
+    prod = vecs1[:,None,:] * vecs2[None,:,:]
+    dots = np.sum(prod,axis=2)
+    # NOTE: does NOT ensure unique matches, update if turns out we need that
+    matches = np.argmax(dots,axis=1)
+    scores = np.max(dots,axis=1)
+    ########## Code ends here ########## 
     return matches, scores
