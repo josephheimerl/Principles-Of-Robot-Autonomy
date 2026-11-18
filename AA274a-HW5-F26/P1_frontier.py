@@ -14,8 +14,9 @@ def window_counts(mask, window_size):
 
     HINT: this is a convolution with a window of ones (scipy.signal.convolve2d with mode="same").
     """
+    kernel = np.ones([window_size,window_size])
     ########## Code starts here ##########
-    raise NotImplementedError
+    counts = convolve2d(mask,kernel,mode="same")
     ########## Code ends here ##########
     return counts
 
@@ -40,7 +41,23 @@ def explore(occupancy, window_size=11, min_unknown=0.25, min_free=0.35, occupied
     """
     probs = occupancy.probs
     ########## Code starts here ##########
-    raise NotImplementedError
+    is_unknown = probs == -1
+    is_occ = probs >= occupied_thresh 
+    is_free = ~is_occ & ~is_unknown
+
+
+    unknown_counts = window_counts(is_unknown, window_size)
+    occ_counts = window_counts(is_occ, window_size)
+    free_counts = window_counts(is_free, window_size)
+
+
+
+    window_area = window_size**2
+
+    is_frontier = (occ_counts == 0) & (unknown_counts/window_area >= min_unknown) & (free_counts/window_area >= min_free)
+    fronteir_idxs = np.nonzero(is_frontier)
+    
+    frontier_states = occupancy.grid2state(np.column_stack([fronteir_idxs[1],fronteir_idxs[0]]))
     ########## Code ends here ##########
     return frontier_states
 
@@ -53,5 +70,9 @@ def closest_frontier(frontier_states, current_state):
         Returns (None, np.inf) if there are no frontier states.
     """
     ########## Code starts here ##########
-    raise NotImplementedError
+    if len(frontier_states)==0:
+        return (None, np.inf)
+    dists = np.linalg.norm(frontier_states - current_state, axis=1)
+    min_idx = np.argmin(dists)
     ########## Code ends here ##########
+    return (frontier_states[min_idx], dists[min_idx])
